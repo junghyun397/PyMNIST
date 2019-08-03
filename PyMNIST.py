@@ -7,7 +7,7 @@ def softmax(x):
 from random import random
 rand_range = (lambda w: int(random() * w // 1))
 
-weight = [random() * 0.2 * 2 - 0.2 for _ in range(28 * 28 * 10)]
+weight = [random() * 0.1 * 2 - 0.1 for _ in range(28 * 28 * 10)]
 bias = [random() * 0.01 for _ in range(10)]
 
 
@@ -36,7 +36,7 @@ def check_acc(acc_x, acc_y, ratio, seq=False):
     return success / acc_range
 
 
-print("===Start Loading MNIST DataSet...===")
+print("===Start loading MNIST data set..====")
 
 byte_2_int = (lambda byte: int.from_bytes(byte, "big", signed=False))
 read_file = (lambda fd_name: open("resource/" + fd_name, "rb"))
@@ -55,7 +55,7 @@ test_size = test_size - (test_size // 5)
 valid_image, valid_label = test_image[test_size:], test_label[test_size:]
 test_image, test_label = test_image[:test_size], test_label[:test_size]
 
-_, vis_count = print("===Success Loading MNIST DataSet!===", "\nEnter visualise case count:"), int(input())
+_, vis_count = print("===Success loading MNIST data set!===", "\nEnter visualise case count:"), int(input())
 
 for seq in range(vis_count):
     index = rand_range(train_size)
@@ -63,9 +63,10 @@ for seq in range(vis_count):
     for j in range(28):
         print("".join(["#" if train_image[index][j * 28 + f] > 0 else "." for f in range(28)]))
 
-_, total_epoch = print("===End Visualize data set===========", "\nEnter epoch count:"), int(input())
+_, total_epoch = print("===End visualize data set===========", "\nEnter epoch count:"), int(input())
 print("===Start Training...================")
 
+train_history = dict()
 for epoch in range(total_epoch):
     l_cost = 0
     for seq in range(train_size):
@@ -74,12 +75,14 @@ for epoch in range(total_epoch):
         y[train_label[index]] = 1.0
         l_cost += backward(train_image[index], x, y, lr=0.002)
         if seq % 500 == 0 and seq != 0:
-            print("acc:", str(check_acc(test_image, test_label, ratio=.05) * 100) + "%", "mean-cost:", l_cost / 1000)
+            acc, l_cost = check_acc(test_image, test_label, ratio=.05) * 100, l_cost / 500
+            train_history[epoch * train_size + seq] = l_cost
+            print("acc:", str(acc) + "%", "mean-cost:", l_cost)
             prc, l_cost = int(seq / train_size * 100 // 2), 0
             print("epoch:", str(epoch+1)+"/"+str(total_epoch), "["+"".join([">"]*prc)+"".join(["."]*(50-prc))+"]")
 
-print("===End, Validation acc:", str(check_acc(valid_image, valid_label, ratio=1, seq=True) * 100) + "%=======")
-_, vis_count = print("Enter Visualise case count:"), int(input())
+print("===End, validation acc:", str(check_acc(valid_image, valid_label, ratio=1, seq=True) * 100) + "%=======")
+_, vis_count = print("Enter visualise case count:"), int(input())
 
 for seq in range(vis_count):
     index = rand_range(len(valid_label))
@@ -87,3 +90,5 @@ for seq in range(vis_count):
     print("Prediction:", x.index(max(x)), "Label:", valid_label[index])
     for j in range(28):
         print("".join(["#" if valid_image[index][j * 28 + f] > 0 else "." for f in range(28)]))
+
+print("Training history:", "\n" + "".join([str(dh[1]) + "," for dh in train_history.items()]))
