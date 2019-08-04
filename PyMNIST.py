@@ -5,7 +5,7 @@ def softmax(x):
 
 
 from random import random
-rand_range = (lambda w: int(random() * w // 1))
+rand_range = (lambda r: int(random() * r // 1))
 
 weight = [random() * 0.1 * 2 - 0.1 for _ in range(28 * 28 * 10)]
 bias = [random() * 0.01 for _ in range(10)]
@@ -76,8 +76,8 @@ for epoch in range(total_epoch):
         l_cost += backward(train_image[index], x, y, lr=0.002)
         if seq % 500 == 0 and seq != 0:
             acc, l_cost = check_acc(test_image, test_label, ratio=.05) * 100, l_cost / 500
-            train_history[epoch * train_size + seq] = l_cost
-            print("acc:", str(acc) + "%", "mean-cost:", l_cost)
+            train_history[min(10 * test_size, epoch * train_size + seq)] = acc, l_cost
+            print("accuracy:", str(acc) + "%", "mean-cost:", l_cost)
             prc, l_cost = int(seq / train_size * 100 // 2), 0
             print("epoch:", str(epoch+1)+"/"+str(total_epoch), "["+"".join([">"]*prc)+"".join(["."]*(50-prc))+"]")
 
@@ -91,4 +91,8 @@ for seq in range(vis_count):
     for j in range(28):
         print("".join(["#" if valid_image[index][j * 28 + f] > 0 else "." for f in range(28)]))
 
-print("Training history:", "\n" + "".join([str(dh[1]) + "," for dh in train_history.items()]))
+print("===Print training history....=======", "\n#: cost @: accuracy")
+acc_history, cost_history = [dt[1][0] for dt in train_history.items()], [dt[1][1] for dt in train_history.items()]
+get_pixel = (lambda va, vc, y: "@" if va/100*40 // 1 == y else ("#" if vc/max(cost_history)*40 // 1 == y else "."))
+for y in reversed(range(1, 41)):
+    print("".join([get_pixel(da, dc, y) for da, dc in zip(acc_history, cost_history)]))
