@@ -2,6 +2,8 @@
 
 MNIST-Handwriting-Classification using Softmax-Regression written in pure Python code without any other libraries. The code is as short and clear as possible, You can check all the codes in the `PyMNIST.py` file. 📈 It also includes a very simple UI.
 
+![printhistory](https://i.imgur.com/k4OKic8.png)
+
 ## Getting Started
 
 When you download and run `setup.py` or paste the code into Python REPL, the script `setup.py` automatically downloads the code for `mnist.py` and downloads and decompresses the MNIST data set.
