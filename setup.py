@@ -13,24 +13,24 @@ path_list = (p_train_image, p_train_label, p_test_image, p_test_label)
 if not os.path.exists(directory):
     os.makedirs(directory)
 
-print("===Start download PyMNIST script =========================")
+print("Start download PyMNIST script...")
 urllib.request.urlretrieve(py_mnist_url, p_py_mnist)
-print("===Success download PyMNIST script =======================")
+print("Complete download PyMNIST script.")
 
 for path in path_list:
-    print("===Start download file:", path[0], "".join(["=" for _ in range(33 - len(path[0]))]))
+    print(f"Start download file:{path[0]} {''.join(['=' for _ in range(34 - len(path[0]))])}")
     urllib.request.urlretrieve(main_url + path[0], directory + path[0])
-    print("Success download file:", path[0])
+    print(f"Complete download file:{path[0]}")
 
-    print("Start extract gzip file:", path[1])
+    print(f"Start extract gzip file:{path[1]}")
     fc, nf = gzip.open(directory + path[0], "rb"), open(directory + path[1], "wb")
-    shutil.copyfileobj(fc, nf); nf.close(), fc.close(); os.remove(directory + path[0])
-    print("===Success extract gzip file:", path[1], "".join(["=" for _ in range(27 - len(path[1]))]))
+    shutil.copyfileobj(fc, nf), nf.close(), fc.close(), os.remove(directory + path[0])
+    print(f"Complete extract gzip file:{path[1]} {''.join(['=' for _ in range(27 - len(path[1]))])}")
 
-print("===Success download all files and script! ================")
+print("Complete download all files and script!")
 if platform.system() == "Windows":
-    print("Run", p_py_mnist, "to continue....")
+    print(f"Run {p_py_mnist} to continue....")
 else:
-    _, inp = print("Press ENTER to automatic run ", p_py_mnist, "or type pypy to run with pypy3"), input()
-    os.system("clear"); os.system("python3 " + p_py_mnist) \
-        if inp != "pypy" else os.system("clear"); os.system("pypy3 " + p_py_mnist)
+    _, inp = print(f"Press ENTER to automatic run {p_py_mnist} or type pypy to run with pypy3"), input()
+    os.system("clear"), os.system("python3 " + p_py_mnist) \
+        if inp != "pypy" else os.system("clear"), os.system("pypy3 " + p_py_mnist)
