@@ -1,3 +1,4 @@
+import os
 from random import random
 rand_range = lambda r: int(random() * r // 1)
 
@@ -33,12 +34,13 @@ def check_acc(model, acc_x, acc_y, ratio, seq=False):
     return success / acc_range
 
 
-def print_graph(history):
-    acc_history, cost_history = [dt[1][0] for dt in history.items()], [dt[1][1] for dt in history.items()]
-    get_pixel = (lambda va, vc, y: "@" if va/100*40 // 1 == y else ("#" if vc/max(cost_history)*40 // 1 == y else "."))
+def print_graph(acc_history, cost_history):
+    max_cost = max(cost_history)
+    lines, columns = os.get_terminal_size().lines - 5, os.get_terminal_size().columns
+    get_pixel = (lambda va, vc, y: "@" if va/100*lines // 1 == y else ("#" if vc/max_cost*lines // 1 == y else "."))
     print("@: accuracy, #: cost")
-    for y in reversed(range(1, 42)):
-        print("".join([get_pixel(da, dc, y) for da, dc in zip(acc_history, cost_history)]))
+    for y in reversed(range(1, lines + 2)):
+        print("".join(get_pixel(da, dc, y) for da, dc in zip(acc_history[max(0, len(acc_history) - columns):], cost_history[max(0, len(cost_history) - columns):])))
 
 
 print("Loading MNIST dataset...")
@@ -72,7 +74,7 @@ for seq in range(showcase_count):
 _, total_epoch, _ = print("End showcase. \nEnter epoch count:"), int(input()), print("Start training...")
 
 model = [random() * 0.1 * 2 - 0.1 for _ in range(28 * 28 * 10)]
-train_history = dict()
+acc_history, cost_history = [], []
 for epoch in range(total_epoch):
     l_cost = 0
     for seq in range(train_size):
@@ -83,10 +85,11 @@ for epoch in range(total_epoch):
         if seq % 500 == 0 and seq != 0:
             acc, m_cost = check_acc(model, test_image, test_label, ratio=.05) * 100, l_cost / 500
             prc, l_cost = int(seq / train_size * 100 // 2), 0
-            train_history[min(300, len(train_history))] = acc, m_cost
-            print_graph(train_history), print(f"accuracy: {str(acc)}% mean-cost:{m_cost}")
+            acc_history.append(acc), cost_history.append(m_cost)
+            print_graph(acc_history, cost_history), print(f"accuracy: {str(acc)}% mean-cost:{m_cost}")
             print(f"epoch: {str(epoch+1)}/{str(total_epoch)}[{''.join(['>']*prc)}{''.join(['.']*(50-prc))}]")
 
+print_graph(acc_history[:os.get_terminal_size().columns], cost_history[:os.get_terminal_size().columns])
 print(f"Complete, validation accuracy:{str(check_acc(model, valid_image, valid_label, ratio=1, seq=True) * 100)}%")
 _, showcase_count = print("Enter showcase count:"), int(input())
 
